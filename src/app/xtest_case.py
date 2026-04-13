@@ -8,27 +8,31 @@ class XTestCase:
 
     def run(self, result: XTestResult):
         result.test_started()
-        self.setup()
+        self.set_up()
         try:
             test_method = getattr(self, self.test_method_name)
             test_method()
         except AssertionError as e:
+            print("Error type: AssertionError")
+            print(e)
             result.add_failure(self.test_method_name)
         except Exception as e:
+            print("Error type: Exception")
+            print(e)
             result.add_error(self.test_method_name)
         self.tear_down()
 
-    def setup(self):
-        raise NotImplementedError("Subclasses must implement this method")
+    def set_up(self):
+        raise NotImplementedError("Subclasses must implement this method: XTestCase#set_up")
 
     def tear_down(self):
-        raise NotImplementedError("Subclasses must implement this method")
+        raise NotImplementedError("Subclasses must implement this method: XTestCase#tear_down")
 
 
 class MyTestCase(XTestCase):
 
-    def setup(self):
-        print("setup")
+    def set_up(self):
+        print("set_up")
 
     def tear_down(self):
         print("tear_down")
