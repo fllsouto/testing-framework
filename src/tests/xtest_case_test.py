@@ -24,7 +24,7 @@ class XTestCaseTest(XTestCase):
         assert self.result.summary() == "1 run, 1 failed, 0 error."
 
     def test_result_error_run(self):
-        stub = XTestStub("test_errpr")
+        stub = XTestStub("test_error")
         stub.run(self.result)
         assert self.result.summary() == "1 run, 0 failed, 1 error."
 
