@@ -6,6 +6,8 @@ from app.xtest_result import XTestResult
 from tests.xtest_case_test import XTestCaseTest
 from tests.xtest_suite_test import XTestSuiteTest
 from app.xtest_suite import XTestSuite
+from app.xtest_loader import XTestLoader
+from tests.xtest_loader_test import XTestLoaderTest
 
 
 def test_xtest_set_up_method():
@@ -130,6 +132,19 @@ def test_xtest_suite_test_complete(complete_suite):
     for test in complete_suite:
         suite.add_test(test)
 
+    suite.run(result)
+
+    assert result.summary() == expected_result
+
+
+def test_xtest_loader_test_basic():
+    suite_name = "xtest_framework_unit_testing#test_xtest_loader_basic"
+    expected_result = "4 run, 0 failed, 0 error."
+    result = XTestResult(suite_name)
+    loader = XTestLoader(debug=True)
+    test_class_name = XTestLoaderTest
+
+    suite = loader.make_suite(test_class_name)
     suite.run(result)
 
     assert result.summary() == expected_result

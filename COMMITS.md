@@ -18,9 +18,11 @@
 - https://github.com/fllsouto/testing-framework/commit/6cee34ee256375c21d7dd503cf95b225920dc50f
 - https://github.com/fllsouto/testing-framework/actions/runs/24323169874
 
-## [ ] Commit 5
+## [x] Commit 5
 
-[EXE] Commit 5. Classe TestSuite
+- [EXE] Commit 5. Classe TestSuite
+- https://github.com/fllsouto/testing-framework/commit/1f82afb6d1a96a2bdb8195ab2dd1f1b1ee73b991
+- https://github.com/fllsouto/testing-framework/actions/runs/24370981850
 
 ## [ ] Commit 6
 
