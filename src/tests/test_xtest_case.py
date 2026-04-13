@@ -60,4 +60,24 @@ def test_xtest_case_test_stubbing():
     test = XTestCaseTest('test_result_multiple_run')
     test.run(result)
 
-    assert expected_result == result.summary()
+    assert result.summary() == expected_result
+
+
+def test_xtest_case_test_spying():
+    suite_name = "xtest_case_unit_testing#test_xtest_case_test_spying"
+    expected_result = "4 run, 0 failed, 0 error."
+    result = XTestResult(suite_name)
+
+    test = XTestCaseTest('test_was_set_up')
+    test.run(result)
+
+    test = XTestCaseTest('test_was_run')
+    test.run(result)
+
+    test = XTestCaseTest('test_was_tear_down')
+    test.run(result)
+
+    test = XTestCaseTest('test_template_method')
+    test.run(result)
+
+    assert result.summary() == expected_result
