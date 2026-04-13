@@ -13,7 +13,7 @@ class XTestResult:
 
     def add_failure(self, test):
         self.failures.append(test)
-    
+
     def add_error(self, test):
         self.errors.append(test)
 

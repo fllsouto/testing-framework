@@ -5,7 +5,7 @@ class XTestStub(XTestCase):
 
     def set_up(self):
         print("XTestStub#set_up implementation")
-    
+
     def tear_down(self):
         print("XTestStub#tear_down implementation")
 

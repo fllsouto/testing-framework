@@ -23,10 +23,14 @@ class XTestCase:
         self.tear_down()
 
     def set_up(self):
-        raise NotImplementedError("Subclasses must implement this method: XTestCase#set_up")
+        raise NotImplementedError(
+            "Subclasses must implement this method: XTestCase#set_up"
+        )
 
     def tear_down(self):
-        raise NotImplementedError("Subclasses must implement this method: XTestCase#tear_down")
+        raise NotImplementedError(
+            "Subclasses must implement this method: XTestCase#tear_down"
+        )
 
 
 class MyTestCase(XTestCase):

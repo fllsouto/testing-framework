@@ -6,13 +6,17 @@
 - https://github.com/fllsouto/testing-framework/commit/1b7748407760b87f1ebfdc943b36daf0acaec5e4
 - https://github.com/fllsouto/testing-framework/actions/runs/24318945234
 
-## [ ] Commit 3
+## [x] Commit 3
 
 - [EXE] Commit 3. Classe TestResult
+- https://github.com/fllsouto/testing-framework/commit/dfd02a9116248b7bd549177b7bdc99f5b0f20b1d
+- https://github.com/fllsouto/testing-framework/actions/runs/24320887350
 
-## [ ] Commit 4
+## [x] Commit 4
 
-[EXE] Commit 4. Testando TestCase
+- [EXE] Commit 4. Testando TestCase
+- https://github.com/fllsouto/testing-framework/commit/6cee34ee256375c21d7dd503cf95b225920dc50f
+- https://github.com/fllsouto/testing-framework/actions/runs/24323169874
 
 ## [ ] Commit 5
 

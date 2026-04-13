@@ -9,11 +9,11 @@ class XTestSpy(XTestCase):
         self.was_set_up = False
         self.was_tear_down = False
         self.log = ""
-    
+
     def set_up(self):
         self.was_set_up = True
         self.log += "set_up "
-    
+
     def test_method(self):
         self.was_run = True
         self.log += "test_method "
