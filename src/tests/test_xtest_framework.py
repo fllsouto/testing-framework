@@ -8,7 +8,7 @@ from tests.xtest_suite_test import XTestSuiteTest
 from app.xtest_suite import XTestSuite
 from app.xtest_loader import XTestLoader
 from tests.xtest_loader_test import XTestLoaderTest
-
+from app.xtest_runner import XTestRunner
 
 def test_xtest_set_up_method():
     error_message = "Subclasses must implement this method"
@@ -141,10 +141,22 @@ def test_xtest_loader_test_basic():
     suite_name = "xtest_framework_unit_testing#test_xtest_loader_basic"
     expected_result = "4 run, 0 failed, 0 error."
     result = XTestResult(suite_name)
-    loader = XTestLoader(debug=True)
+    loader = XTestLoader()
     test_class_name = XTestLoaderTest
 
     suite = loader.make_suite(test_class_name)
     suite.run(result)
+
+    assert result.summary() == expected_result
+
+
+def test_xtest_runner():
+    expected_result = "4 run, 0 failed, 0 error."
+    loader = XTestLoader()
+    test_class_name = XTestLoaderTest
+    suite = loader.make_suite(test_class_name)
+
+    runner = XTestRunner()
+    result = runner.run(suite)
 
     assert result.summary() == expected_result
