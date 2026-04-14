@@ -36,6 +36,8 @@
 - https://github.com/fllsouto/testing-framework/commit/befa1f305d7b015551b5b68582526bf605b55296
 - https://github.com/fllsouto/testing-framework/actions/runs/24373549866
 
-## [ ] Commit 8
+## [x] Commit 8
 
-[EXE] Commit 8. Comandos Assert
+- [EXE] Commit 8. Comandos Assert
+- https://github.com/fllsouto/testing-framework/commit/326e5af9d5f1ff50cb8d4467109d943ca5460c70
+- https://github.com/fllsouto/testing-framework/actions/runs/24374419643
