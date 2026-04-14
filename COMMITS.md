@@ -24,9 +24,11 @@
 - https://github.com/fllsouto/testing-framework/commit/1f82afb6d1a96a2bdb8195ab2dd1f1b1ee73b991
 - https://github.com/fllsouto/testing-framework/actions/runs/24370981850
 
-## [ ] Commit 6
+## [x] Commit 6
 
-[EXE] Commit 6. Classes TestLoader e TestRunner
+- [EXE] Commit 6. Classes TestLoader e TestRunner
+- https://github.com/fllsouto/testing-framework/commit/295d1345d2846add8b7996afeb747a0d597e8788
+- https://github.com/fllsouto/testing-framework/actions/runs/24373339339
 
 ## [ ] Commit 7
 

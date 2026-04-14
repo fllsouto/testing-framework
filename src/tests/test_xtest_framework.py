@@ -10,6 +10,7 @@ from app.xtest_loader import XTestLoader
 from tests.xtest_loader_test import XTestLoaderTest
 from app.xtest_runner import XTestRunner
 
+
 def test_xtest_set_up_method():
     error_message = "Subclasses must implement this method"
     with pytest.raises(Exception) as exc:
@@ -155,6 +156,25 @@ def test_xtest_runner():
     loader = XTestLoader()
     test_class_name = XTestLoaderTest
     suite = loader.make_suite(test_class_name)
+
+    runner = XTestRunner()
+    result = runner.run(suite)
+
+    assert result.summary() == expected_result
+
+
+def test_all_xtest_test():
+    expected_result = "15 run, 0 failed, 0 error."
+
+    loader = XTestLoader()
+    xtest_case_suite = loader.make_suite(XTestCaseTest)
+    xtest_suite_suite = loader.make_suite(XTestSuiteTest)
+    xtest_load_suite = loader.make_suite(XTestLoaderTest)
+
+    suite = XTestSuite()
+    suite.add_test(xtest_case_suite)
+    suite.add_test(xtest_suite_suite)
+    suite.add_test(xtest_load_suite)
 
     runner = XTestRunner()
     result = runner.run(suite)
