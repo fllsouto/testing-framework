@@ -58,3 +58,29 @@ class XTestCaseTest(XTestCase):
         spy = XTestSpy("test_method")
         spy.run(self.result)
         assert spy.log == "set_up test_method tear_down"
+
+    # XTestAssertionMixin
+
+    def test_assert_true(self):
+        self.assert_true(True)
+
+    def test_assert_false(self):
+        self.assert_false(False)
+
+    def test_assert_equal(self):
+        self.assert_equal("", "")
+        self.assert_equal("foo", "foo")
+        self.assert_equal([], [])
+        self.assert_equal(["foo"], ["foo"])
+        self.assert_equal((), ())
+        self.assert_equal(("foo"), ("foo"))
+        self.assert_equal({}, {})
+        self.assert_equal({"foo"}, {"foo"})
+
+    def test_assert_in(self):
+        animals = {"monkey": "banana", "cow": "grass", "seal": "fish"}
+
+        self.assert_in("a", "abc")
+        self.assert_in("foo", ["foo"])
+        self.assert_in(1, [1, 2, 3])
+        self.assert_in("monkey", animals)

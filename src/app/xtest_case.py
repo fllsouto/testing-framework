@@ -1,7 +1,29 @@
 from app.xtest_result import XTestResult
 
 
-class XTestCase:
+class XTestAssertionMixin:
+    def assert_equal(self, first, second):
+        if first != second:
+            msg = f"{first} != {second}"
+            raise AssertionError(msg)
+
+    def assert_true(self, expr):
+        if not expr:
+            msg = f"{expr} is not true"
+            raise AssertionError(msg)
+
+    def assert_false(self, expr):
+        if expr:
+            msg = f"{expr} is not false"
+            raise AssertionError(msg)
+
+    def assert_in(self, member, container):
+        if member not in container:
+            msg = f"{member} is not in {container}"
+            raise AssertionError(msg)
+
+
+class XTestCase(XTestAssertionMixin):
 
     def __init__(self, test_method_name: str):
         self.test_method_name = test_method_name

@@ -30,9 +30,11 @@
 - https://github.com/fllsouto/testing-framework/commit/295d1345d2846add8b7996afeb747a0d597e8788
 - https://github.com/fllsouto/testing-framework/actions/runs/24373339339
 
-## [ ] Commit 7
+## [x] Commit 7
 
-[EXE] Commit 7. Executando Todos os Testes
+- [EXE] Commit 7. Executando Todos os Testes
+- https://github.com/fllsouto/testing-framework/commit/befa1f305d7b015551b5b68582526bf605b55296
+- https://github.com/fllsouto/testing-framework/actions/runs/24373549866
 
 ## [ ] Commit 8
 

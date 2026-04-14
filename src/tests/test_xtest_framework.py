@@ -164,7 +164,7 @@ def test_xtest_runner():
 
 
 def test_all_xtest_test():
-    expected_result = "15 run, 0 failed, 0 error."
+    expected_result = "19 run, 0 failed, 0 error."
 
     loader = XTestLoader()
     xtest_case_suite = loader.make_suite(XTestCaseTest)
