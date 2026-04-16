@@ -550,3 +550,198 @@ Then the gitignore rule starts taking effect on future changes.
 ### One last pattern: gitignore in subdirectories
 
 You can put a `.gitignore` in any directory, not just the repo root. Rules in a nested `.gitignore` apply relative to *that* directory. Useful when one subdirectory has unique artifacts (e.g., `src/notebooks/.gitignore` ignoring `.ipynb_checkpoints/` locally). Most small projects don't need this — one root-level file covers everything.
+
+---
+
+## 19. The Mixin pattern (Python)
+
+> Source: [Real Python — Python Mixins](https://realpython.com/python-mixin/)
+
+A **mixin** is a class designed to **add a specific, reusable capability to other classes** via multiple inheritance — *not* to stand on its own. The canonical example in this project: `XTestAssertionMixin` gives any class that inherits from it `assert_equal`, `assert_true`, `assert_false`, `assert_in` — but you'd never instantiate `XTestAssertionMixin()` directly.
+
+### Inheritance vs. mixin: *is-a* vs. *has-a-capability*
+
+- **Inheritance** — `XTestStub IS A XTestCase`. The subclass is a specialization of the parent.
+- **Mixin** — `XTestCase HAS a capability to assert`. The mixin adds a feature; it doesn't establish type identity.
+
+```python
+class XTestCase(XTestAssertionMixin):        # ← gains assertion helpers
+    ...
+```
+
+Reading this: "`XTestCase` is itself a test case, *and* it has the capability to assert." The mixin augments without claiming hierarchy.
+
+### The five rules of well-behaved mixins
+
+1. **Name ends in `Mixin`** (or `MixIn`) — signals the pattern. Python has no syntax marker.
+2. **Stateless or near-stateless** — don't define instance attributes. Rely on attributes from the classes the mixin is mixed into. This prevents namespace collisions when multiple mixins stack.
+3. **Single responsibility** — one capability per mixin. If you're tempted to bundle "assertions + logging + serialization" into one mixin, split them.
+4. **Cooperative `__init__`** — if the mixin defines one, call `super().__init__(*args, **kwargs)` and accept arbitrary arguments, so the MRO chain stays unbroken.
+5. **Order matters** — in the inheritance list, mixins come **before** the primary base class. `class X(LoggingMixin, AuthMixin, BaseView):` — Python's MRO means left-most wins when resolving method calls, so mixins get priority.
+
+### Why our `XTestAssertionMixin` is correctly designed
+
+- ✅ **Name**: ends in `Mixin`.
+- ✅ **Stateless**: no `__init__`, no `self.foo = ...`. The methods only read arguments.
+- ✅ **Single responsibility**: only assertions. No lifecycle code, no logging.
+- ✅ **No `__init__`**: avoids the cooperative-init problem entirely — the mixin adds no state.
+- ✅ **Order**: `class XTestCase(XTestAssertionMixin):` — mixin appears first (well, only; there's no second base class yet).
+
+### Pitfalls to avoid (with our framework in mind)
+
+**Too many mixins stacked**: if `XTestCase(LoggingMixin, DurationMixin, AssertionMixin, ReportingMixin, Base)` grows to 5+ mixins, you have a **God object**. The stack becomes hard to reason about, hard to debug, and any two mixins writing to the same attribute will silently stomp each other. Three feels like a comfortable ceiling in practice.
+
+**Uncooperative `__init__`**: `XTestSpy.__init__` currently does `XTestCase.__init__(self, name)`. That works *now*, but breaks the moment you insert a mixin with its own `__init__` into the MRO — the mixin's init never runs. The cooperative form is `super().__init__(name)`. BONUS_EXES Ex. 14 is this refactor.
+
+**State collision**: two mixins that both set `self.log = ...` will overwrite each other. Avoid by making mixins stateless (rule #2), or by name-mangling (`self.__auth_log` vs `self.__trace_log`).
+
+### When to reach for a mixin vs. alternatives
+
+| Use mixin | Use inheritance | Use composition |
+|---|---|---|
+| Adding an **optional feature** across unrelated types | Establishing an **is-a** relationship | Wiring **collaborators** that have their own lifecycle |
+| Avoiding duplicated code without forcing a common parent | Enforcing a contract via abstract base classes | When inheritance chain becomes too deep |
+| Extending third-party classes without modifying source | When polymorphism is the point | When state conflicts would be problematic |
+
+Our assertion-helpers-as-mixin case: we wanted any test class to *optionally* have assertion helpers, without making "has assertion helpers" part of the test hierarchy. Mixin is the right call.
+
+### A concrete comparison
+
+**As a mixin (what we did)**:
+```python
+class XTestAssertionMixin:
+    def assert_equal(self, a, b): ...
+
+class XTestCase(XTestAssertionMixin):  # ← gains assertions
+    def run(self, result): ...
+```
+
+**As inheritance (wrong tool)**:
+```python
+class AssertingBase:
+    def assert_equal(self, a, b): ...
+
+class XTestCase(AssertingBase):  # ← implies XTestCase IS-A AssertingBase
+    def run(self, result): ...
+```
+
+The inheritance version muddies the semantics — "what is an AssertingBase?" isn't a meaningful type. With the mixin, the capability is a capability, not a type.
+
+**As composition (also valid)**:
+```python
+class Asserter:
+    def assert_equal(self, a, b): ...
+
+class XTestCase:
+    def __init__(self, name):
+        self.asserter = Asserter()
+    def run(self, result):
+        self.asserter.assert_equal(...)  # ← explicit delegation
+```
+
+Valid, but noisier at call sites (`self.asserter.assert_equal` vs `self.assert_equal`). Composition wins when the collaborator has its own lifecycle; mixin wins when the capability is stateless syntactic sugar.
+
+---
+
+## 20. The Composite pattern (your `XTestSuite`)
+
+You built the Composite pattern without naming it. Worth recognizing the shape.
+
+### The contract
+
+A Composite is made of **leaves** and **branches** where both implement the *same interface*. The client (here, `XTestRunner`) treats them uniformly.
+
+- **Leaf**: `XTestCase.run(result)` — runs one test method.
+- **Branch**: `XTestSuite.run(result)` — iterates tests, calls `.run(result)` on each.
+
+Because both expose `.run(result)`, a suite can contain suites:
+
+```python
+outer = XTestSuite()
+outer.add_test(xtest_case_suite)   # suite-inside-suite — still just a "test"
+outer.add_test(xtest_loader_suite)
+outer.run(result)
+```
+
+This is what `test_all_xtest_test` does — 19 framework tests executed through one uniform call.
+
+### Why it's powerful here
+
+- **Recursion for free**: `XTestSuite.run` doesn't know (or care) whether each entry is a case or a sub-suite. Python's duck typing + shared method signature makes it transparent.
+- **No special-casing for size 1**: "one test" and "many tests" go through the same API. The caller doesn't branch on `len(tests) == 1`.
+- **Symmetric growth**: adding parallel execution, reporters, or timing hooks — you add them once, at the suite level, and they apply to cases *and* nested suites.
+
+### The subtle cost
+
+Composite trades explicit structure for uniformity. If one day you need "only suites can contain suites; cases cannot" — you've lost that guarantee. Shared interfaces mean shared capabilities, for better and worse.
+
+For a test framework, this is the right trade. For, say, a file system where directories-can-contain-files-but-not-vice-versa, you'd want explicit type distinction.
+
+---
+
+## 21. Self-hosting tests (xUnit bootstrapping)
+
+Your `XTestCaseTest` is *a test* (it extends `XTestCase`) *about* the very thing it extends. Same for `XTestSuiteTest` and `XTestLoaderTest`. This is the xUnit bootstrapping pattern from Kent Beck's *TDD: By Example*.
+
+### Why it matters
+
+- **It's the trust moment**: when your framework can run its own tests and they pass, you've earned a second-order invariant — "if the framework breaks, the framework's own tests break too".
+- **Dogfooding at the deepest level**: every UX wart in `XTestCase`, you feel directly when writing `XTestCaseTest`. Pain points become features to fix (or to leave as debt with eyes open).
+- **Circular dependency that's healthy**: `XTestCaseTest` depends on `XTestCase` depending on `XTestCase`. The cycle is harmless because runtime evaluation order doesn't actually depend on `XTestCaseTest` — pytest just happens to drive it into existence.
+
+### The unavoidable escape hatch
+
+You still need pytest as the *outer* runner, because *something* must bootstrap the first `XTestCaseTest.run(result)` call. A test framework can test itself, but only one level deep. The outermost runner must come from outside. That's why `test_xtest_framework.py` exists — it's the pytest layer that invokes your framework layer.
+
+In real xUnit frameworks (JUnit, NUnit, pytest itself), this outer layer is either a hand-written bootstrap or a trusted minimal harness.
+
+---
+
+## 22. Assertion helpers vs. plain `assert`
+
+Why does your framework have `self.assert_equal(a, b)` when Python already has `assert a == b`? Three good reasons:
+
+### 1. Stripped by `-O` (this is what Bandit's B101 warns about)
+
+`python -O myscript.py` strips `assert` statements. If you use `assert` for a security check — gone in production. If you use `assert_equal` — the method call stays, the raise inside stays.
+
+### 2. Framework-controlled failure messages
+
+```python
+assert a == b  # failure: "assert 'foo' == 'bar'"
+self.assert_equal(a, b)  # failure: "foo != bar" (customizable)
+```
+
+Your framework can produce structured output (types, diffs, context) when `assert_equal` fails. Plain `assert` is at the mercy of Python's default repr.
+
+### 3. Hook point for evolution
+
+Once you have `assert_equal`, you can later add:
+- Logging to a test result
+- Duration sampling
+- Approximate-equal for floats
+- Custom comparers (deep-equal for dicts, near-equal for numpy)
+
+None of that is possible with bare `assert` — there's no method to hook.
+
+### The flip side: pytest's clever `assert`
+
+Pytest rewrites `assert` at bytecode level to generate rich failure messages (`assert_rewriting` plugin). In pytest, `assert a == b` does give you the diff — because pytest cheated. Kent Beck's xUnit predates this capability, which is why every classical xUnit framework has `assertEqual`-style helpers. Modern pytest proved you don't *have* to.
+
+Trade-off: in *your* framework, helpers are the right call because you don't have the bytecode-rewriter. In a project that uses pytest directly, plain `assert` + pytest's rewriter is idiomatic.
+
+---
+
+## 23. Tech-debt maturity: what resolving an entry actually means
+
+As you fix things in `TECH_DEBT.md`, you'll want to close entries. The habit worth cultivating:
+
+1. **Fix the code.**
+2. **Remove the entry from the open list.**
+3. **Add a one-line row to `Resolved` section with the commit SHA** (or date, if not using PRs).
+4. **Verify via `make check`** — if the fix introduced no regression, the test suite confirms it.
+5. **Only then** declare it done.
+
+Skipping steps 2-4 leaves `TECH_DEBT.md` as an ever-growing list where nothing visibly closes. That kills the habit — the file becomes aspirational wallpaper. A tech-debt log is worth keeping *if* entries actually leave it.
+
+Your session already closed **TD-05**, **TD-09**, **TC-01**, **TC-02** — worth updating the file. New entry earned: **TH-06** (Bandit B101 findings in `xtest_stub.py`, BONUS_EXES Ex. 16 addresses).
